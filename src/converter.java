@@ -16,11 +16,6 @@ class UnitConverter {
 	public String[][] prefixArray;
 	int midindex = 0;
 
-	String[] parseSide(StringBuilder line) {
-		String[] side = line.toString().split("\\=");
-		return side;
-	}
-
 	String parseConstant(StringBuilder line) {
 
 		StringBuilder sb = new StringBuilder();
@@ -33,15 +28,6 @@ class UnitConverter {
 			}
 		}
 		return null;
-	}
-
-	StringBuilder[] parsePhrase(StringBuilder line) {
-		String[] word = line.toString().split("\\*|\\/|=\\?");
-		StringBuilder[] phrase = new StringBuilder[word.length];
-		for (int i = 0; i < word.length; i++) {
-			phrase[i] = new StringBuilder(word[i]);
-		}
-		return phrase;
 	}
 
 	int[] parseExponent(StringBuilder line) {
@@ -91,6 +77,15 @@ class UnitConverter {
 		return exponent;
 	}
 
+	StringBuilder[] parsePhrase(StringBuilder line) {
+		String[] word = line.toString().split("\\*|\\/|=\\?");
+		StringBuilder[] phrase = new StringBuilder[word.length];
+		for (int i = 0; i < word.length; i++) {
+			phrase[i] = new StringBuilder(word[i]);
+		}
+		return phrase;
+	}
+	
 	StringBuilder[] parseBottom(StringBuilder[] phrase) {
 		StringBuilder[] bottom = new StringBuilder[phrase.length];
 		Pattern pattern = Pattern.compile("([a-z|A-Z|가-힣]+)");
@@ -102,6 +97,11 @@ class UnitConverter {
 		return bottom;
 	}
 
+	/**
+	 * Return array of prefix names (0th element of every 2 element)
+	 * from the prefix array that was previously read from file
+	 * @return array of prefix names
+	 */
 	String[] getPrefixName() {
 		String[] unitName = new String[prefixArray.length];
 		for (int i = 0; i < prefixArray.length; i++) {
@@ -110,6 +110,11 @@ class UnitConverter {
 		return unitName;
 	}
 
+	/**
+	 * Return array of prefix names (0th element of every 2 element)
+	 * from the prefix array that was previously read from file
+	 * @return array of prefix names
+	 */
 	String[] getUnitName() {
 		String[] unitName = new String[unitArray.length];
 		for (int i = 0; i < unitArray.length; i++) {
@@ -118,8 +123,15 @@ class UnitConverter {
 		return unitName;
 	}
 	
+	
+	/**
+	 * Takes array of bottom clause containing both unit and prefix,
+	 * and return array of strings containing only one unit.
+	 * @param bottom
+	 * @return unit
+	 */
 	String[] parseUnit(StringBuilder[] bottom) {
-		readUnitFile("unit.txt");
+		unitArray = readUnitFile("unit.txt");
 		String[] units = getUnitName();
 		String[] unit = new String[bottom.length];
 		for (int i = 0; i < bottom.length; i++) {
@@ -138,8 +150,15 @@ class UnitConverter {
 		return unit;
 	}
 	
+	
+	/**
+	 * Takes array of bottom clause containing both unit and prefix,
+	 * and return array of strings containing null or one prefix.
+	 * @param bottom
+	 * @return prefix
+	 */
 	String[] parsePrefix(StringBuilder[] bottom) {
-		readPrefixFile("prefix.txt");
+		prefixArray = readPrefixFile("prefix.txt");
 		String[] prefixs = getPrefixName();
 		String[] prefix = new String[bottom.length];
 		for (int i = 0; i < bottom.length; i++) {
@@ -152,6 +171,12 @@ class UnitConverter {
 		return prefix;
 	}
 
+	/**
+	 * Count and return line number of given file
+	 * @param aFile
+	 * @return line number of file
+	 * @throws IOException
+	 */
 	int countLines(File aFile) throws IOException {
 		LineNumberReader reader = null;
 		try {
@@ -167,7 +192,12 @@ class UnitConverter {
 		}
 	}
 
-	void readUnitFile(String path) {
+	/**
+	 * Read the file of given path and return all of its unit data
+	 * @param path to file
+	 * @return 2-dimensional array of unit data
+	 */
+	String[][] readUnitFile(String path) {
 		File file = new File(path);
 		int lineNo = 0;
 		try {
@@ -175,7 +205,7 @@ class UnitConverter {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		unitArray = new String[lineNo][5];
+		String[][] unitArray = new String[lineNo][5];
 
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));) {
 			String line = null;
@@ -183,14 +213,21 @@ class UnitConverter {
 			while ((line = br.readLine()) != null) {
 				unitArray[i++] = line.split("\t");
 			}
+			return unitArray;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return null;
 	}
-
-	void readPrefixFile(String path) {
+	
+	/**
+	 * Read the file of given path and return all of its prefix data
+	 * @param path to file
+	 * @return 2-dimensional array of prefix data
+	 */
+	String[][] readPrefixFile(String path) {
 		File file = new File(path);
 		int lineNo = 0;
 		try {
@@ -198,7 +235,7 @@ class UnitConverter {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		prefixArray = new String[lineNo][2];
+		String[][] prefixArray = new String[lineNo][2];
 
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));) {
 			String line = null;
@@ -206,13 +243,24 @@ class UnitConverter {
 			while ((line = br.readLine()) != null) {
 				prefixArray[i++] = line.split("\t");
 			}
+			return prefixArray;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return null;
 	}
 
+	
+	/**
+	 * Take in an unit and compare with unit preset.
+	 * If the match for the unit found in the preset,
+	 * return dimension for g, m, s and ratio for proper conversion.
+	 * If no match, return null.
+	 * @param unit
+	 * @return gmsr
+	 */
 	String[] solveDimension(String unit) {
 		String[] gmsr = new String[4];
 		for (int i = 0; i < unitArray.length; i++) {
