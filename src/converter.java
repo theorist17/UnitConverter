@@ -313,7 +313,7 @@ class UnitConverter {
 				return null;
 		}
 		
-		return new BigDecimal(left[3]).divide(new BigDecimal(right[3]));
+		return new BigDecimal(left[3]).divide(new BigDecimal(right[3]), 100, BigDecimal.ROUND_DOWN);
 	}
 	
 
