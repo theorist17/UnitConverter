@@ -6,12 +6,153 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.math.BigDecimal;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class converter {
+class UnitConverter {
+	public String[][] unitArray;
+	public String[][] prefixArray;
+	int midindex = 0;
 
-	public static int countLines(File aFile) throws IOException {
+	String[] parseSide(StringBuilder line) {
+		String[] side = line.toString().split("\\=");
+		return side;
+	}
+
+	String parseConstant(StringBuilder line) {
+
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < line.length(); i++) {
+			if ((line.charAt(i) <= '9' && line.charAt(i) >= '0') || line.charAt(i) == '-' || line.charAt(i) == '.') {
+				sb.append(line.charAt(i));
+			} else {
+				line.delete(0, i);
+				return sb.toString();
+			}
+		}
+		return null;
+	}
+
+	StringBuilder[] parsePhrase(StringBuilder line) {
+		String[] word = line.toString().split("\\*|\\/|=\\?");
+		StringBuilder[] phrase = new StringBuilder[word.length];
+		for (int i = 0; i < word.length; i++) {
+			phrase[i] = new StringBuilder(word[i]);
+		}
+		return phrase;
+	}
+
+	int[] parseExponent(StringBuilder line) {
+		String[] phrase = line.toString().split("\\*|\\/|=\\?");
+		int[] exponent = new int[phrase.length];
+
+		// determine base exponent for each phrase
+		// if it's located before first occurrence of '/', assign 1 for the all phrases
+		// assign -1 otherwise
+		// '=' sets the exponent sequence to 1, for that right side of equation starts
+		int one = 1;
+		int index = 1;
+		exponent[0] = one;
+		for (int i = 0; i < line.length(); i++) {
+			if (line.charAt(i) == '*') {
+				exponent[index++] = one;
+			} else if (line.charAt(i) == '/') {
+				one *= -1;
+				exponent[index++] = one;
+			} else if (line.charAt(i) == '=') {
+				one = 1;
+				midindex = index;
+				exponent[index++] = one;
+			}
+		}
+
+		// get dimension and multiply to base exponent
+		for (int i = 0; i < exponent.length; i++) {
+			int magnitude = 1;
+			
+			// search for pattern like ^(1), ^(-1), and ^1 (not ^-1)
+			if (phrase[i].contains("^")) {
+				String subString = phrase[i].substring(phrase[i].indexOf("^"));
+				StringBuilder sb = new StringBuilder();
+				if (Pattern.matches("\\^{1}(([0-9]{1})|(\\(-?[0-9]{1}\\)))", subString)) {
+					for (int j = 0; j < phrase[i].length(); j++) {
+						if (('0' <= phrase[i].charAt(j) && phrase[i].charAt(j) <= '9') || phrase[i].charAt(j) == '-') {
+							sb.append(phrase[i].charAt(j));
+						}
+					}
+				}
+				magnitude = Integer.parseInt(sb.toString());
+			} 
+			exponent[i] *= magnitude;
+		}
+
+		return exponent;
+	}
+
+	StringBuilder[] parseBottom(StringBuilder[] phrase) {
+		StringBuilder[] bottom = new StringBuilder[phrase.length];
+		Pattern pattern = Pattern.compile("([a-z|A-Z|가-힣]+)");
+		for (int i = 0; i < phrase.length; i++) {
+			Matcher matcher = pattern.matcher(phrase[i]);
+			if (matcher.find())
+				bottom[i] = new StringBuilder(matcher.group());
+		}
+		return bottom;
+	}
+
+	String[] getPrefixName() {
+		String[] unitName = new String[prefixArray.length];
+		for (int i = 0; i < prefixArray.length; i++) {
+			unitName[i] = prefixArray[i][0];
+		}
+		return unitName;
+	}
+
+	String[] getUnitName() {
+		String[] unitName = new String[unitArray.length];
+		for (int i = 0; i < unitArray.length; i++) {
+			unitName[i] = unitArray[i][0];
+		}
+		return unitName;
+	}
+	
+	String[] parseUnit(StringBuilder[] bottom) {
+		readUnitFile("unit.txt");
+		String[] units = getUnitName();
+		String[] unit = new String[bottom.length];
+		for (int i = 0; i < bottom.length; i++) {
+			for (int j = 0; j < units.length; j++) {
+				if (bottom[i].toString().endsWith(units[j])) {
+					unit[i] = units[j];
+					//remove detected unit, leaving only prefix inside the bottom clause
+					String onlyPrefix = bottom[i].toString().replaceAll(units[j], "");
+					bottom[i] = new StringBuilder(onlyPrefix);
+					break;
+				}
+			}
+//			if (unit[i] == null)
+//				System.out.println("No match for " + bottom[i]);
+		}
+		return unit;
+	}
+	
+	String[] parsePrefix(StringBuilder[] bottom) {
+		readPrefixFile("prefix.txt");
+		String[] prefixs = getPrefixName();
+		String[] prefix = new String[bottom.length];
+		for (int i = 0; i < bottom.length; i++) {
+			for (int j = 0; j < prefixs.length; j++) {
+				if (bottom[i].toString().equals(prefixs[j])) {
+					prefix[i] = prefixs[j];
+				}
+			}
+		}
+		return prefix;
+	}
+
+	int countLines(File aFile) throws IOException {
 		LineNumberReader reader = null;
 		try {
 			reader = new LineNumberReader(new FileReader(aFile));
@@ -26,7 +167,7 @@ public class converter {
 		}
 	}
 
-	static String[][] readUnitFile(String path) {
+	void readUnitFile(String path) {
 		File file = new File(path);
 		int lineNo = 0;
 		try {
@@ -34,23 +175,22 @@ public class converter {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		String[][] array = new String[lineNo][4];
+		unitArray = new String[lineNo][5];
 
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));) {
 			String line = null;
 			int i = 0;
 			while ((line = br.readLine()) != null) {
-				array[i++] = line.split("\t");
+				unitArray[i++] = line.split("\t");
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return array;
 	}
 
-	static String[][] readPrefixFile(String path) {
+	void readPrefixFile(String path) {
 		File file = new File(path);
 		int lineNo = 0;
 		try {
@@ -58,177 +198,133 @@ public class converter {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		String[][] array = new String[lineNo][2];
+		prefixArray = new String[lineNo][2];
 
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));) {
 			String line = null;
 			int i = 0;
 			while ((line = br.readLine()) != null) {
-				array[i++] = line.split("\t");
+				prefixArray[i++] = line.split("\t");
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return array;
 	}
 
-	public static String[] getUnitName(String[][] unit) {
-		String[] array = new String[unit.length];
-		for (int i = 0; i < unit.length; i++) {
-			array[i] = unit[i][0];
+	String[] solveDimension(String unit) {
+		String[] gmsr = new String[4];
+		for (int i = 0; i < unitArray.length; i++) {
+			if (unit.equals(unitArray[i][0])) {
+				gmsr[0] = unitArray[i][1];
+				gmsr[1] = unitArray[i][2];
+				gmsr[2] = unitArray[i][3];
+				gmsr[3] = unitArray[i][4];
+			}
 		}
-		return array;
+		return gmsr;
 	}
+	
+	BigDecimal aggregateDimension(String[] unit, int[] exponent){
+		String[] left = new String[] {"0", "0", "0", "1"};
+		String[] right = new String[] {"0", "0", "0", "1"};
+		
+		// aggregating left units
+		for(int i = 0 ; i < midindex;i++) {
+			String[] gms = solveDimension(unit[i]);
+			BigDecimal g = new BigDecimal(gms[0]).multiply(new BigDecimal(exponent[i]));
+			BigDecimal m = new BigDecimal(gms[1]).multiply(new BigDecimal(exponent[i]));
+			BigDecimal s = new BigDecimal(gms[2]).multiply(new BigDecimal(exponent[i]));
+			BigDecimal r = new BigDecimal(gms[3]);
+			left[0] = new BigDecimal(left[0]).add(g).toString(); //g
+			left[1] = new BigDecimal(left[1]).add(m).toString(); //m
+			left[2] = new BigDecimal(left[2]).add(s).toString(); //s
+			for(int j = 0 ; j <exponent[i]; j++) {
+				left[3] = new BigDecimal(left[3]).multiply(r).toString(); //s
+			}
+		}
+		
+		for(int i = midindex ; i < unit.length;i++) {
+			String[] gms = solveDimension(unit[i]);
+			BigDecimal g = new BigDecimal(gms[0]).multiply(new BigDecimal(exponent[i]));
+			BigDecimal m = new BigDecimal(gms[1]).multiply(new BigDecimal(exponent[i]));
+			BigDecimal s = new BigDecimal(gms[2]).multiply(new BigDecimal(exponent[i]));
+			BigDecimal r = new BigDecimal(gms[3]);
+			right[0] = new BigDecimal(right[0]).add(g).toString();
+			right[1] = new BigDecimal(right[1]).add(m).toString();
+			right[2] = new BigDecimal(right[2]).add(s).toString();
+			for(int j = 0 ; j <exponent[i]; j++) {
+				right[3] = new BigDecimal(right[3]).multiply(r).toString(); //s
+			}
+		}
+		
+		// comapre total gms of the left side with of the right
+		for (int i = 0 ; i < 3; i++) {
+			if(!left[i].equals(right[i]))
+				return null;
+		}
+		
+		return new BigDecimal(left[3]).divide(new BigDecimal(right[3]));
+	}
+	
 
-	/**
-	 * @param target
-	 * @param candidates
-	 * @return
-	 */
-	public static int isUnit(String target, String[] candidates) {
-		int matchedAlphabet = 0;
-		String reversed = new StringBuilder(target).reverse().toString();
-
-		for (int i = 0; i < candidates.length; i++) {
-			String reversed2 = new StringBuilder(candidates[i]).reverse().toString();
-			for (int j = 0; j < candidates[i].length(); j++) {
-				if (j < target.length()) {
-					if (reversed.charAt(j) == reversed2.charAt(j)) {
-						matchedAlphabet++;
+	BigDecimal aggregatePrefix(String[] prefix, int[] exponent){
+		int left = 0;
+		int right = 0;
+		
+		// aggregating prefixs on left side
+		for(int i = 0 ; i < midindex;i++) {
+			if(prefix[i]!=null) {
+				for(int j = 0; j < prefixArray.length; j++) {
+					if(prefix[i].equals(prefixArray[j][0])) {
+						left += Integer.parseInt(prefixArray[j][1]) * exponent[i];
 					}
 				}
 			}
-			if (matchedAlphabet == candidates[i].length()) {
-				return matchedAlphabet;
-			}
-			matchedAlphabet = 0;
-		}
-
-		return -1;
-	}
-	
-	public static String[] deliminateUnit(String side) {
-
-		StringBuilder sb = new StringBuilder(side);
-		for (int i = 0; i < sb.length(); i++) {
-			if (sb.charAt(i) == '/') {
-				sb.setCharAt(i, '*');
-			}
-		}
-		String[] strings = sb.toString().split("\\*");
-		return strings;
-	}
-	
-	static String parseConstant(String side) {
-		
-		StringBuilder sb = new StringBuilder();
-		for(int i = 0 ; i < side.length(); i++) {
-			if(side.charAt(i)<='9'&&side.charAt(i)>='0') {
-				sb.append(side.charAt(i));
-			}
-		}
-		return sb.toString();
-	}
-	
-	static String parseUnit(String side) {
-		
-		StringBuilder sb = new StringBuilder();
-		for(int i = 0 ; i < side.length(); i++) {
-			if(Pattern.matches("\\^{1}((-?[0-9]{1})|(\\(-?[0-9]{1}\\)))", side.substring(i)))
-				
 		}
 		
-		return sb.toString();
-	}
-	public static int parseDimension(String unit) {
-		// if contains ^
-		if (unit.contains("^")) {
-			String substring = unit.substring(unit.indexOf("^"));
-			int beginIndex = 0, endIndex = 0;
-
-			// if contains regex
-			if (Pattern.matches("\\^{1}((-?[0-9]{1})|(\\(-?[0-9]{1}\\)))", substring)) {
-				for (int i = 0; i < unit.length(); i++) {
-					if (('0' <= unit.charAt(i) && unit.charAt(i) <= '9') || unit.charAt(i) == '-') {
-						if (beginIndex == 0)
-							beginIndex = i;
-						endIndex = i;
+		// aggregating prefixs on right side
+		for(int i = midindex ; i < prefix.length;i++) {
+			if(prefix[i]!=null)
+				for(int j = 0; j < prefixArray.length; j++) {
+					if(prefix[i].equals(prefixArray[j][0])) {
+						right += Integer.parseInt(prefixArray[j][1]) * exponent[i];
 					}
 				}
-				return Integer.parseInt(unit, beginIndex, endIndex + 1, 10);
-				// if not regex, an error
-			} else {
-				return -1;
-			}
-			// if nothing
-		} else {
-			return 1;
 		}
+		
+		return new BigDecimal(left - right);
 	}
+
+	void convert(String input) {
+
+		StringBuilder line = new StringBuilder(input);
+
+		String constant = parseConstant(line);
+		int[] exponent = parseExponent(line);
+		StringBuilder[] phrase = parsePhrase(line);
+		StringBuilder[] bottom = parseBottom(phrase);
+		String[] unit = parseUnit(bottom);
+		String[] prefix = parsePrefix(bottom);
+		
+			
+		BigDecimal totalConnstant = new BigDecimal(constant);
+		BigDecimal totalRatio = aggregateDimension(unit, exponent);
+		BigDecimal totalPrefix = aggregatePrefix(prefix, exponent);
+		BigDecimal totalMultiplier = new BigDecimal(Math.pow(10, totalPrefix.doubleValue()));
+		BigDecimal answer = totalRatio.multiply(totalConnstant).multiply(totalMultiplier);
+		
+		System.out.println(answer);
+	}
+}
+
+public class converter {
+
 	public static void main(String[] args) {
-
-		String[][] unit = readUnitFile("unit.txt");
-		String[][] prefixs = readPrefixFile("prefix.txt");
-		String[] units = getUnitName(unit);
-
-//while (true){
-		Scanner scan = new Scanner(System.in);
-		String input = scan.nextLine().replaceAll(" ", "");
-		String[] equation = input.split("\\=");
-		String left = equation[0];
-		String right = equation[1];
-
-		System.out.println("left : "+left);
-		System.out.println("right : "+right);
-		convert(left.replaceAll("[0-9]", ""), units, parseConstant(left));
-		convert(right.replaceAll("[0-9]", ""), units, parseConstant(right));
-//}
-		scan.close();
+		Scanner scanner = new Scanner(System.in);
+		String input = scanner.nextLine().replaceAll(" ", "");
+		new UnitConverter().convert(input);
+		scanner.close();
 	}
-
-	static void convert(String line, String[] units, String constant) {
-		
-		String[] word = deliminateUnit(line);
-
-		int[] dimension = new int[word.length];
-		StringBuilder prefix = new StringBuilder();
-		StringBuilder unit = new StringBuilder();
-
-		int indexFound = 0;
-		for (int i = 0; i < word.length; i++) {
-			indexFound = isUnit(word[i], units);
-
-			// if not a unit, error
-			if (indexFound < 0)
-				return;
-
-			// if regex fail, error
-			dimension[i] = parseDimension(word[i]);
-			if (dimension[i] < 0)
-				return;
-			System.out.print(dimension[i] + ", ");
-
-			// print unit and prefix for each corresponding words
-			String str = new StringBuilder(word[i]).reverse().substring(0, indexFound).toString();
-			str = new StringBuilder(str).reverse().toString();
-			unit.append(str + ",");
-
-			int temp = word[i].length() - indexFound;
-			String str2 = new StringBuilder(word[i]).substring(0, temp).toString();
-			if (str2 != null) {
-				prefix.append(str2);
-			}
-		}
-		System.out.println();
-
-		if(constant==null) {
-			System.out.println("constant : " + "null");
-		} else {
-			System.out.println("constant : " + constant);
-		}
-		System.out.println("total prefix : " + prefix);
-		System.out.println("total unit : " + unit);
-	}
-} // prefix append 전에 생성된 prefix가 txt에 존재하는 것인지도 판단해야할듯??
+}
