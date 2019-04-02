@@ -286,7 +286,12 @@ class UnitConverter {
       return gmsr;
    }
 
-   BigDecimal aggregateDimension(String[] unit, int[] exponent) {
+   /**
+ * @param unit
+ * @param exponent
+ * @return 
+ */
+BigDecimal aggregateDimension(String[] unit, int[] exponent) {
       String[] left = new String[] { "0", "0", "0", "1" };
       String[] right = new String[] { "0", "0", "0", "1" };
 
@@ -296,13 +301,15 @@ class UnitConverter {
          BigDecimal g = new BigDecimal(gms[0]).multiply(new BigDecimal(exponent[i]));
          BigDecimal m = new BigDecimal(gms[1]).multiply(new BigDecimal(exponent[i]));
          BigDecimal s = new BigDecimal(gms[2]).multiply(new BigDecimal(exponent[i]));
-         BigDecimal r = new BigDecimal(gms[3]);
+         BigDecimal r = new BigDecimal(gms[3]).pow(Math.abs(exponent[i]));
          left[0] = new BigDecimal(left[0]).add(g).toString(); // g
          left[1] = new BigDecimal(left[1]).add(m).toString(); // m
          left[2] = new BigDecimal(left[2]).add(s).toString(); // s
-         for (int j = 0; j < exponent[i]; j++) {
-            left[3] = new BigDecimal(left[3]).multiply(r).toString(); // s
-         }
+         if(exponent[i]>=0)
+        	 left[3] = new BigDecimal(left[3]).multiply(r).toString(); // ratio needed to convert
+         else
+        	 left[3] = new BigDecimal(left[3]).divide(r, 100, BigDecimal.ROUND_DOWN).toString(); // ratio needed to convert
+      
       }
 
       for (int i = midindex; i < unit.length; i++) {
@@ -310,13 +317,14 @@ class UnitConverter {
          BigDecimal g = new BigDecimal(gms[0]).multiply(new BigDecimal(exponent[i]));
          BigDecimal m = new BigDecimal(gms[1]).multiply(new BigDecimal(exponent[i]));
          BigDecimal s = new BigDecimal(gms[2]).multiply(new BigDecimal(exponent[i]));
-         BigDecimal r = new BigDecimal(gms[3]);
+         BigDecimal r = new BigDecimal(gms[3]).pow(Math.abs(exponent[i]));
          right[0] = new BigDecimal(right[0]).add(g).toString();
          right[1] = new BigDecimal(right[1]).add(m).toString();
          right[2] = new BigDecimal(right[2]).add(s).toString();
-         for (int j = 0; j < exponent[i]; j++) {
-            right[3] = new BigDecimal(right[3]).multiply(r).toString(); // s
-         }
+         if(exponent[i]>=0) 
+        	 right[3] = new BigDecimal(right[3]).multiply(r).toString(); // ratio needed to convert
+         else
+        	 right[3] = new BigDecimal(right[3]).divide(r, 100, BigDecimal.ROUND_DOWN).toString(); // ratio needed to convert
       }
 
       // comapre total gms of the left side with of the right
@@ -379,7 +387,7 @@ class UnitConverter {
       BigDecimal totalPrefix = aggregatePrefix(prefix, exponent);
       BigDecimal totalMultiplier = new BigDecimal(Math.pow(10, totalPrefix.doubleValue()));
       BigDecimal answer = totalRatio.multiply(totalConnstant).multiply(totalMultiplier);
-      System.out.println(answer);
+      System.out.println(answer.toPlainString());
       System.out.println("변환에 성공하였습니다.");
    }
 }
@@ -502,6 +510,9 @@ class UserUnit {
 
 }
 
+/**
+ * Start main menu
+ */
 class JucMenu {
    public JucMenu() {
    }
@@ -587,7 +598,7 @@ class JucMenu {
                String input;
                while ((input = scanner.nextLine()).length() == 0) {
                }
-               input.replaceAll(" ", "");
+               input = input.replaceAll(" ", "");
                uc.convert(input);
                count++;
                repeat = scanner.next();
