@@ -98,8 +98,9 @@ class UnitConverter {
 		Pattern pattern = Pattern.compile("([a-z|A-Z|가-힇]+)");
 		for (int i = 0; i < phrase.length; i++) {
 			Matcher matcher = pattern.matcher(phrase[i]);
-			if (matcher.find())
+			if (matcher.find()) {
 				bottom[i] = new StringBuilder(matcher.group());
+			}
 		}
 		return bottom;
 	}
@@ -148,7 +149,6 @@ class UnitConverter {
 				if (bottom[i].toString().endsWith(units[j])) {
 					unit[i] = units[j];
 					// remove detected unit, leaving only prefix inside the bottom clause
-
 					String onlyPrefix = bottom[i].reverse().toString()
 							.replaceFirst(new StringBuilder(units[j]).reverse().toString(), "");
 					bottom[i] = new StringBuilder(onlyPrefix);
@@ -343,7 +343,7 @@ class UnitConverter {
 		return new BigDecimal(left[3]).divide(new BigDecimal(right[3]), 100, RoundingMode.FLOOR);
 	}
 
-	BigDecimal aggregatePrefix(String[] prefix, int[] exponent) {
+	BigDecimal aggregatePrefix(String[] prefix, int[] exponent, StringBuilder[] phrase) {
 		int left = 0;
 		int right = 0;
 
@@ -352,7 +352,12 @@ class UnitConverter {
 			if (prefix[i] != null) {
 				for (int j = 0; j < prefixArray.length; j++) {
 					if (prefix[i].equals(prefixArray[j][0])) {
-						left += Integer.parseInt(prefixArray[j][1]) * exponent[i];
+//						//if a phrase contains a () clause, its prefix
+//						//must be powered by its exponent			
+						if(phrase[i].toString().contains("("))
+							left += Integer.parseInt(prefixArray[j][1]) * exponent[i];
+						else
+							left += Integer.parseInt(prefixArray[j][1]);
 					}
 				}
 			}
@@ -363,7 +368,10 @@ class UnitConverter {
 			if (prefix[i] != null)
 				for (int j = 0; j < prefixArray.length; j++) {
 					if (prefix[i].equals(prefixArray[j][0])) {
-						right += Integer.parseInt(prefixArray[j][1]) * exponent[i];
+						if(phrase[i].toString().contains("("))
+							right += Integer.parseInt(prefixArray[j][1]) * exponent[i];
+						else
+							right += Integer.parseInt(prefixArray[j][1]);
 					}
 				}
 		}
@@ -391,7 +399,8 @@ class UnitConverter {
 			System.out.println("변환 차원이 맞지 않습니다");
 			return;
 		}
-		int totalPrefix = aggregatePrefix(prefix, exponent).intValue();
+		
+		int totalPrefix = aggregatePrefix(prefix, exponent, phrase).intValue();
 		BigDecimal totalMultiplier = new BigDecimal(1);
 		for(int i = 0; i< Math.abs(totalPrefix); i++)
 			if (totalPrefix>=0) 
