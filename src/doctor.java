@@ -1,5 +1,5 @@
 
-public class test {
+public class doctor {
 	static String parseUnit(String phrase) {
 		
 		for(int i = phrase.length()-1 ; i >= 0; i--) {
