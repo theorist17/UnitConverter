@@ -1,17 +1,13 @@
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
-import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -312,8 +308,8 @@ class UnitConverter {
 				left[3] = new BigDecimal(left[3]).multiply(r).toString(); // ratio needed to convert
 			else
 				left[3] = new BigDecimal(left[3]).divide(r, 100, RoundingMode.FLOOR).toString(); // ratio needed
-																											// to
-																											// convert
+			// to
+			// convert
 
 		}
 
@@ -330,8 +326,8 @@ class UnitConverter {
 				right[3] = new BigDecimal(right[3]).multiply(r).toString(); // ratio needed to convert
 			else
 				right[3] = new BigDecimal(right[3]).divide(r, 100, RoundingMode.FLOOR).toString(); // ratio
-																											// needed to
-																											// convert
+			// needed to
+			// convert
 		}
 
 		// comapre total gms of the left side with of the right
@@ -352,9 +348,9 @@ class UnitConverter {
 			if (prefix[i] != null) {
 				for (int j = 0; j < prefixArray.length; j++) {
 					if (prefix[i].equals(prefixArray[j][0])) {
-//						//if a phrase contains a () clause, its prefix
-//						//must be powered by its exponent			
-						if(phrase[i].toString().contains("("))
+//                  //if a phrase contains a () clause, its prefix
+//                  //must be powered by its exponent         
+						if (phrase[i].toString().contains("("))
 							left += Integer.parseInt(prefixArray[j][1]) * exponent[i];
 						else
 							left += Integer.parseInt(prefixArray[j][1]);
@@ -368,7 +364,7 @@ class UnitConverter {
 			if (prefix[i] != null)
 				for (int j = 0; j < prefixArray.length; j++) {
 					if (prefix[i].equals(prefixArray[j][0])) {
-						if(phrase[i].toString().contains("("))
+						if (phrase[i].toString().contains("("))
 							right += Integer.parseInt(prefixArray[j][1]) * exponent[i];
 						else
 							right += Integer.parseInt(prefixArray[j][1]);
@@ -399,11 +395,11 @@ class UnitConverter {
 			System.out.println("변환 차원이 맞지 않습니다");
 			return;
 		}
-		
+
 		int totalPrefix = aggregatePrefix(prefix, exponent, phrase).intValue();
 		BigDecimal totalMultiplier = new BigDecimal(1);
-		for(int i = 0; i< Math.abs(totalPrefix); i++)
-			if (totalPrefix>=0) 
+		for (int i = 0; i < Math.abs(totalPrefix); i++)
+			if (totalPrefix >= 0)
 				totalMultiplier = totalMultiplier.multiply(new BigDecimal(10));
 			else
 				totalMultiplier = totalMultiplier.divide(new BigDecimal(10), 100, RoundingMode.FLOOR);
@@ -539,8 +535,6 @@ class UserUnit {
  */
 class JucMenu {
 	Scanner scanner = new Scanner(System.in);
-	String repeat = "q";
-	boolean doloop = true;
 
 	public void showManual() {
 		System.out.println("   Converter               Manual               JUC\n");
@@ -600,7 +594,9 @@ class JucMenu {
 	}
 
 	void JucMenu() {
+		String repeat = "q";
 		while (repeat.equals("q")) {
+			boolean doloop = true;
 			System.out.println("1. 단위 변환");
 			System.out.println("2. 사용자 단위 설정");
 			System.out.println("3. 메뉴얼 출력");
