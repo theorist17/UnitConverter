@@ -352,8 +352,12 @@ class UnitConverter {
 //                  //must be powered by its exponent         
 						if (phrase[i].toString().contains("("))
 							left += Integer.parseInt(prefixArray[j][1]) * exponent[i];
-						else
-							left += Integer.parseInt(prefixArray[j][1]);
+						else {
+							if (exponent[i]>=0)
+								left += Integer.parseInt(prefixArray[j][1]);
+							else 
+								left -= Integer.parseInt(prefixArray[j][1]);
+						}
 					}
 				}
 			}
@@ -366,8 +370,12 @@ class UnitConverter {
 					if (prefix[i].equals(prefixArray[j][0])) {
 						if (phrase[i].toString().contains("("))
 							right += Integer.parseInt(prefixArray[j][1]) * exponent[i];
-						else
-							right += Integer.parseInt(prefixArray[j][1]);
+						else {
+							if (exponent[i]>=0)
+								right += Integer.parseInt(prefixArray[j][1]);
+							else
+								right -= Integer.parseInt(prefixArray[j][1]);
+						}
 					}
 				}
 		}
