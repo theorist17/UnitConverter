@@ -601,7 +601,7 @@ class JucMenu {
 
 	}
 
-	void JucMenu() {
+	void MainMenu() {
 		String repeat = "q";
 		while (repeat.equals("q")) {
 			boolean doloop = true;
@@ -696,12 +696,6 @@ public class Converter {
 
 	public static void main(String[] args) {
 		JucMenu menu = new JucMenu();
-		try {
-			menu = new JucMenu();
-			menu.JucMenu();
-		} finally {
-			// if (menu != null)
-			// menu.cleanup();
-		}
+		menu.MainMenu();
 	}
 }
