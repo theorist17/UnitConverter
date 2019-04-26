@@ -27,6 +27,13 @@ class UnitConverter {
 				sb.append(line.charAt(i));
 			} else {
 				line.delete(0, i);
+//				System.out.println("Data coverage---------------");
+//				System.out.println(sb);
+//				System.out.println("---------------Data coverage");
+//				Data coverage---------------
+//				1kg=?g
+//				1
+//				---------------Data coverage
 				return sb.toString();
 			}
 		}
@@ -45,15 +52,39 @@ class UnitConverter {
 		int count = 1;
 		exponent[0] = multiplier;
 		for (int i = 0; i < line.length(); i++) {
+
 			if (line.charAt(i) == '*') {
+//				System.out.println("Branch coverage---------------");
+//				System.out.println(multiplier);
 				exponent[count++] = multiplier;
+//				System.out.println("---------------Branch coverage");
+//				Branch coverage---------------
+//				1k*g/g=?k
+//				1
+//				---------------Branch coverage
 			} else if (line.charAt(i) == '/') {
+//				System.out.println("Branch coverage---------------");
 				multiplier *= -1;
+//				System.out.println(multiplier);
 				exponent[count++] = multiplier;
+//				System.out.println("---------------Branch coverage");
+//				Branch coverage---------------
+//				1k*g/g=?k
+//				-1
+//				---------------Branch coverage
 			} else if (line.charAt(i) == '=') {
+//				System.out.println("Branch coverage---------------");
 				multiplier = 1;
 				midindex = count;
+//				System.out.println(multiplier);
+//				System.out.println(midindex);
 				exponent[count++] = multiplier;
+//				System.out.println("---------------Branch coverage");
+//				Branch coverage---------------
+//				1k*g/g=?k
+//				1
+//				3
+//				---------------Branch coverage
 			}
 		}
 
@@ -66,11 +97,30 @@ class UnitConverter {
 				String subString = phrase[i].substring(phrase[i].indexOf("^"));
 				StringBuilder sb = new StringBuilder();
 				if (Pattern.matches("\\^{1}(([0-9]{1})|(\\(-?[0-9]{1}\\)))", subString)) {
+
+//					System.out.println("Branch coverage---------------");
+//					System.out.println(subString);
+//					System.out.println("---------------Branch coverage");
+//					Branch coverage---------------
+//					1kg^2=?g*g
+//					^2
+//					---------------Branch coverage
 					for (int j = 0; j < phrase[i].length(); j++) {
 						if (('0' <= phrase[i].charAt(j) && phrase[i].charAt(j) <= '9') || phrase[i].charAt(j) == '-') {
 							sb.append(phrase[i].charAt(j));
 						}
 					}
+//					System.out.println("Branch coverage---------------");
+//					System.out.println(sb);
+//					System.out.println("---------------Branch coverage");
+//					Branch coverage---------------
+//					1kg^(-2)=?g*g
+//					^(-2)
+//					---------------Branch coverage
+//					Branch coverage---------------
+//					1kg^2=?g*g
+//					2
+//					---------------Branch coverage
 				}
 				multiplier2 = Integer.parseInt(sb.toString());
 			}
@@ -85,6 +135,29 @@ class UnitConverter {
 		StringBuilder[] phrase = new StringBuilder[word.length];
 		for (int i = 0; i < word.length; i++) {
 			phrase[i] = new StringBuilder(word[i]);
+
+//			System.out.println("Branch coverage---------------");
+//			System.out.println(phrase[i]);
+//			System.out.println("---------------Branch coverage");
+//			1kg*mm/ds=?g*m/s
+//			Branch coverage---------------
+//			kg
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			mm
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			ds
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			g
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			m
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			s
+//			---------------Branch coverage
 		}
 		return phrase;
 	}
@@ -96,6 +169,28 @@ class UnitConverter {
 			Matcher matcher = pattern.matcher(phrase[i]);
 			if (matcher.find()) {
 				bottom[i] = new StringBuilder(matcher.group());
+//				System.out.println("Branch coverage---------------");
+//				System.out.println(bottom[i]);
+//				System.out.println("---------------Branch coverage");
+//				1kg*mm/ds=?g*m/s
+//				Branch coverage---------------
+//				kg
+//				---------------Branch coverage
+//				Branch coverage---------------
+//				mm
+//				---------------Branch coverage
+//				Branch coverage---------------
+//				ds
+//				---------------Branch coverage
+//				Branch coverage---------------
+//				g
+//				---------------Branch coverage
+//				Branch coverage---------------
+//				m
+//				---------------Branch coverage
+//				Branch coverage---------------
+//				s
+//				---------------Branch coverage
 			}
 		}
 		return bottom;
@@ -108,11 +203,70 @@ class UnitConverter {
 	 * @return array of prefix names
 	 */
 	String[] getPrefixName() {
-		String[] unitName = new String[prefixArray.length];
+		String[] prefixName = new String[prefixArray.length];
 		for (int i = 0; i < prefixArray.length; i++) {
-			unitName[i] = prefixArray[i][0];
+			prefixName[i] = prefixArray[i][0];
+
+//			System.out.println("Branch coverage---------------");
+//			System.out.println(prefixName[i]);
+//			System.out.println("---------------Branch coverage");
+
+//			Branch coverage---------------
+//			h
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			k
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			M
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			G
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			T
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			P
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			E
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			Z
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			Y
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			d
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			c
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			m
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			n
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			p
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			f
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			a
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			z
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			y
+//			---------------Branch coverage
 		}
-		return unitName;
+		return prefixName;
 	}
 
 	/**
@@ -125,6 +279,44 @@ class UnitConverter {
 		String[] unitName = new String[unitArray.length];
 		for (int i = 0; i < unitArray.length; i++) {
 			unitName[i] = unitArray[i][0];
+
+//			System.out.println("Branch coverage---------------");
+//			System.out.println(unitName[i]);
+//			System.out.println("---------------Branch coverage");
+//			1g=?g
+//			Branch coverage---------------
+//			g
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			m
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			s
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			Hz
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			N
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			Pa
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			J
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			W
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			Bq
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			Gy
+//			---------------Branch coverage
+//			Branch coverage---------------
+//			Sv
+//			---------------Branch coverage
 		}
 		return unitName;
 	}
@@ -139,6 +331,7 @@ class UnitConverter {
 	String[] parseUnit(StringBuilder[] bottom) {
 		unitArray = readUnitFile("unit.txt");
 		String[] units = getUnitName();
+
 		String[] unit = new String[bottom.length];
 		for (int i = 0; i < bottom.length; i++) {
 			for (int j = 0; j < units.length; j++) {
@@ -148,6 +341,28 @@ class UnitConverter {
 					String onlyPrefix = bottom[i].reverse().toString()
 							.replaceFirst(new StringBuilder(units[j]).reverse().toString(), "");
 					bottom[i] = new StringBuilder(onlyPrefix);
+//					System.out.println("Branch coverage---------------");
+//					System.out.println(bottom[i]);
+//					System.out.println("---------------Branch coverage");
+//					1kg*mm/ds=?g*m/s
+//					Branch coverage---------------
+//					k
+//					---------------Branch coverage
+//					Branch coverage---------------
+//					m
+//					---------------Branch coverage
+//					Branch coverage---------------
+//					d
+//					---------------Branch coverage
+//					Branch coverage---------------
+//
+//					---------------Branch coverage
+//					Branch coverage---------------
+//
+//					---------------Branch coverage
+//					Branch coverage---------------
+//
+//					---------------Branch coverage
 					break;
 				}
 			}
@@ -174,6 +389,29 @@ class UnitConverter {
 			for (int j = 0; j < prefixs.length; j++) {
 				if (bottom[i].toString().equals(prefixs[j])) {
 					prefix[i] = prefixs[j];
+//					System.out.println("Branch coverage---------------");
+//					System.out.println(prefix[i]);
+//					System.out.println("---------------Branch coverage");
+//					1kg*mm/ds=?hg*ym/as
+//					Branch coverage---------------
+//					k
+//					---------------Branch coverage
+//					Branch coverage---------------
+//					m
+//					---------------Branch coverage
+//					Branch coverage---------------
+//					d
+//					---------------Branch coverage
+//					Branch coverage---------------
+//					h
+//					---------------Branch coverage
+//					Branch coverage---------------
+//					y
+//					---------------Branch coverage
+//					Branch coverage---------------
+//					a
+//					---------------Branch coverage
+
 				}
 			}
 		}
@@ -223,6 +461,43 @@ class UnitConverter {
 			int i = 0;
 			while ((line = br.readLine()) != null) {
 				unitArray[i++] = line.split("\t");
+//				System.out.println("Data coverage---------------");
+//				System.out.println(unitArray[i-1][0]+" "+unitArray[i-1][1]+" "+unitArray[i-1][2]+" "+unitArray[i-1][3]+" "+unitArray[i-1][4]);
+//				System.out.println("---------------Data coverage");
+//				1kg*mm/ds=?hg*ym/as
+//				Data coverage---------------
+//				g 1 0 0 1
+//				---------------Data coverage
+//				Data coverage---------------
+//				m 0 1 0 1
+//				---------------Data coverage
+//				Data coverage---------------
+//				s 0 0 1 1
+//				---------------Data coverage
+//				Data coverage---------------
+//				Hz 0 0 -1 1
+//				---------------Data coverage
+//				Data coverage---------------
+//				N 1 1 -2 1000
+//				---------------Data coverage
+//				Data coverage---------------
+//				Pa 1 -1 -2 1000
+//				---------------Data coverage
+//				Data coverage---------------
+//				J 1 2 -2 1000
+//				---------------Data coverage
+//				Data coverage---------------
+//				W 1 2 -3 1000
+//				---------------Data coverage
+//				Data coverage---------------
+//				Bq 0 0 -1 1
+//				---------------Data coverage
+//				Data coverage---------------
+//				Gy 0 2 -2 1
+//				---------------Data coverage
+//				Data coverage---------------
+//				Sv 0 2 -2 1
+//				---------------Data coverage
 			}
 			return unitArray;
 		} catch (FileNotFoundException e) {
@@ -254,6 +529,64 @@ class UnitConverter {
 			int i = 0;
 			while ((line = br.readLine()) != null) {
 				prefixArray[i++] = line.split("\t");
+//				System.out.println("Data coverage---------------");
+//				System.out.println(prefixArray[i-1][0]+" "+prefixArray[i-1][1]);
+//				System.out.println("---------------Data coverage");
+//				1kg*mm/ds=?hg*ym/as
+//				Data coverage---------------
+//				h 2
+//				---------------Data coverage
+//				Data coverage---------------
+//				k 3
+//				---------------Data coverage
+//				Data coverage---------------
+//				M 6
+//				---------------Data coverage
+//				Data coverage---------------
+//				G 9
+//				---------------Data coverage
+//				Data coverage---------------
+//				T 12
+//				---------------Data coverage
+//				Data coverage---------------
+//				P 15
+//				---------------Data coverage
+//				Data coverage---------------
+//				E 18
+//				---------------Data coverage
+//				Data coverage---------------
+//				Z 21
+//				---------------Data coverage
+//				Data coverage---------------
+//				Y 24
+//				---------------Data coverage
+//				Data coverage---------------
+//				d -1
+//				---------------Data coverage
+//				Data coverage---------------
+//				c -2
+//				---------------Data coverage
+//				Data coverage---------------
+//				m -3
+//				---------------Data coverage
+//				Data coverage---------------
+//				n -9
+//				---------------Data coverage
+//				Data coverage---------------
+//				p -12
+//				---------------Data coverage
+//				Data coverage---------------
+//				f -15
+//				---------------Data coverage
+//				Data coverage---------------
+//				a -18
+//				---------------Data coverage
+//				Data coverage---------------
+//				z -21
+//				---------------Data coverage
+//				Data coverage---------------
+//				y -24
+//				---------------Data coverage
 			}
 			return prefixArray;
 		} catch (FileNotFoundException e) {
@@ -282,6 +615,28 @@ class UnitConverter {
 				gmsr[3] = unitArray[i][4];
 			}
 		}
+//		System.out.println("Data coverage---------------");
+//		System.out.println(gmsr[0]+" "+gmsr[1]+" "+gmsr[2]+" "+gmsr[3]);
+//		System.out.println("---------------Data coverage");
+//		1kg*mm/ds=?hg*ym/as
+//		Data coverage---------------
+//		1 0 0 1
+//		---------------Data coverage
+//		Data coverage---------------
+//		0 1 0 1
+//		---------------Data coverage
+//		Data coverage---------------
+//		0 0 1 1
+//		---------------Data coverage
+//		Data coverage---------------
+//		1 0 0 1
+//		---------------Data coverage
+//		Data coverage---------------
+//		0 1 0 1
+//		---------------Data coverage
+//		Data coverage---------------
+//		0 0 1 1
+//		---------------Data coverage
 		return gmsr;
 	}
 
@@ -353,9 +708,9 @@ class UnitConverter {
 						if (phrase[i].toString().contains(")^"))
 							left += Integer.parseInt(prefixArray[j][1]) * exponent[i];
 						else {
-							if (exponent[i]>=0)
+							if (exponent[i] >= 0)
 								left += Integer.parseInt(prefixArray[j][1]);
-							else 
+							else
 								left -= Integer.parseInt(prefixArray[j][1]);
 						}
 					}
@@ -371,7 +726,7 @@ class UnitConverter {
 						if (phrase[i].toString().contains(")^"))
 							right += Integer.parseInt(prefixArray[j][1]) * exponent[i];
 						else {
-							if (exponent[i]>=0)
+							if (exponent[i] >= 0)
 								right += Integer.parseInt(prefixArray[j][1]);
 							else
 								right -= Integer.parseInt(prefixArray[j][1]);
