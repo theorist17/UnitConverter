@@ -350,7 +350,7 @@ class UnitConverter {
 					if (prefix[i].equals(prefixArray[j][0])) {
 //                  //if a phrase contains a () clause, its prefix
 //                  //must be powered by its exponent         
-						if (phrase[i].toString().contains("("))
+						if (phrase[i].toString().contains(")^"))
 							left += Integer.parseInt(prefixArray[j][1]) * exponent[i];
 						else {
 							if (exponent[i]>=0)
@@ -368,7 +368,7 @@ class UnitConverter {
 			if (prefix[i] != null)
 				for (int j = 0; j < prefixArray.length; j++) {
 					if (prefix[i].equals(prefixArray[j][0])) {
-						if (phrase[i].toString().contains("("))
+						if (phrase[i].toString().contains(")^"))
 							right += Integer.parseInt(prefixArray[j][1]) * exponent[i];
 						else {
 							if (exponent[i]>=0)
